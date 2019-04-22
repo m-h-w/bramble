@@ -1,0 +1,13 @@
+GOOS=linux go build brambleScraper.go
+zip brambleScraper.zip ./brambleScraper
+# --handler is the path to the executable inside the .zip
+aws lambda create-function \
+  --region eu-west-1 \
+  --function-name lambda-handler \ **
+  --memory 128 \
+  --role arn:aws:iam::183412319895:role/service-role/brambleGeneralExecutionRole \
+  --runtime go1.x \
+  --zip-file fileb://path-to-your-zip-file/handler.zip \ **
+  --handler lambda-handler **
+
+

@@ -3,13 +3,16 @@ package main
 import (
 	"errors"
 	"fmt"
-	"github.com/quirkey/magick"
+	//"github.com/quirkey/magick"
+	"github.com/aws/aws-lambda-go/lambda"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"strings"
 )
 
 // Uses imagemagick to increase the image size by 50%
+/*
 func convertIncrease50(img []byte) {
 
 	image, err := magick.NewFromBlob(img, "gif")
@@ -19,8 +22,10 @@ func convertIncrease50(img []byte) {
 		panic(err)
 	}
 }
+*/
 
-func main() {
+func HandleRequest() {
+
 	req, err := http.NewRequest("GET", "http://www.bramblemet.co.uk", nil)
 	if err != nil {
 		panic(err)
@@ -36,7 +41,7 @@ func main() {
 
 			url, err := response.Location()
 			if err != nil {
-				fmt.Println(err)
+				log.Println(err)
 			}
 
 			fmt.Printf("response: ")
@@ -44,12 +49,12 @@ func main() {
 			//fmt.Println(url.Host)
 			//fmt.Println(url.Path)
 			s := strings.Split(url.Path, "/")
-			fmt.Printf("token: ")
-			fmt.Println(s[1]) //s[1] contains the token
+			log.Printf("token: ")
+			log.Println(s[1]) //s[1] contains the token
 
 			req, err := http.NewRequest("GET", "http://bramblemet.co.uk/"+s[1]+"/GetImage.ashx?src=windreport.gif", nil) //
 			if err != nil {
-				panic(err)
+				log.Panic(err)
 			}
 
 			// header contents gleaned form looking at the network view in chrome  developer mode. Server seems to be sensative to the referer header setting.
@@ -59,30 +64,34 @@ func main() {
 			req.Header.Set("Accept", "image/webp,image/apng,image/*,*/*;q=0.8")
 			req.Header.Set("Referer", "http://bramblemet.co.uk/"+s[1]+"/default.aspx")
 
-			fmt.Printf("req: ")
-			fmt.Println(req)
+			log.Printf("req: ")
+			log.Println(req)
 
 			response, err := client.Do(req)
 			if err != nil {
-				panic(err)
+				log.Panic(err)
 			}
 
-			fmt.Printf("response content length: ")
-			fmt.Println(response.ContentLength)
+			log.Printf("response content length: ")
+			log.Println(response.ContentLength)
 
 			// read the image into a buffer
 			b, err := ioutil.ReadAll(response.Body)
 			response.Body.Close()
 			if err != nil {
-				panic(err)
+				log.Panic(err)
 			}
 
-			fmt.Printf("Body: \n")
-			fmt.Printf("%x", b)
+			log.Printf("Body: \n")
+			log.Printf("%x", b)
 
 		} else {
-			panic(err)
+			log.Panic(err)
 		}
 	}
 
+}
+
+func main() {
+	lambda.Start(HandleRequest)
 }
